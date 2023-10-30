@@ -1394,6 +1394,31 @@ class CmisManagerTask(threading.Thread):
             if key in ["PortConfigDone", "PortInitDone"]:
                 break
 
+    def guess_subport(self, own_lport):
+        # Load the lanes and pport of the given lport
+        own_pport = int(self.port_dict[own_lport].get('index', "-1"))
+        own_lanes = self.port_dict[own_lport].get('lanes', "").strip()
+
+        # Find the start lane of all lports on this pport, in ascending order
+        startlanes_on_pport = []
+        for lport, info in self.port_dict.items():
+            if int(info.get('index', "-1")) != own_pport:
+                continue
+            lanes = info.get('lanes', "").strip()
+            startlane = min(int(lane) for lane in lanes.split(','))
+            startlanes_on_pport.append(startlane)
+
+        if len(startlanes_on_pport) == 1:
+            # No breakout on this pport
+            return 0
+
+        # Check which position our lport has in the sorted list
+        startlane = min(int(lane) for lane in own_lanes.split(','))
+        subport = sorted(startlanes_on_pport).index(startlane) + 1
+        self.log_notice("{}: Guessing subport {} of {} on pport {}"
+                        .format(own_lport, subport, len(startlanes_on_pport), own_pport))
+        return subport + 1
+
     def task_worker(self):
         self.xcvr_table_helper = XcvrTableHelper(self.namespaces)
 
@@ -1439,8 +1464,14 @@ class CmisManagerTask(threading.Thread):
                 pport = int(info.get('index', "-1"))
                 speed = int(info.get('speed', "0"))
                 lanes = info.get('lanes', "").strip()
-                subport = info.get('subport', 0)
-                if pport < 0 or speed == 0 or len(lanes) < 1 or subport < 0:
+                if pport < 0 or speed == 0 or len(lanes) < 1:
+                    continue
+
+                if 'subport' not in info:
+                    # Try to guess subport based on lane configuration.
+                    self.port_dict[lport]['subport'] = self.guess_subport(lport)
+                subport = self.port_dict[lport]['subport']
+                if subport < 0:
                     continue
 
                 # Desired port speed on the host side
