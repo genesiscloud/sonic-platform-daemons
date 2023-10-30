@@ -1532,7 +1532,7 @@ class CmisManagerTask(threading.Thread):
                         if self.port_dict[lport]['media_lanes_mask'] <= 0:
                             self.log_error("{}: Invalid media lane mask received - media_lane_count {} "
                                             "media_lane_assignment_options {} lport{} subport {}"
-                                            " appl {}!".format(media_lane_count,media_lane_assignment_options,lport,subport,appl))
+                                            " appl {}!".format(lport, media_lane_count, media_lane_assignment_options, lport, subport, appl))
                             self.port_dict[lport]['cmis_state'] = self.CMIS_STATE_FAILED
                             continue
                         media_lanes_mask = self.port_dict[lport]['media_lanes_mask']
