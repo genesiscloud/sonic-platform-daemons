@@ -902,6 +902,9 @@ class CmisManagerTask(threading.Thread):
     def log_notice(self, message):
         helper_logger.log_notice("CMIS: {}".format(message))
 
+    def log_warning(self, message):
+        helper_logger.log_warning("CMIS: {}".format(message))
+
     def log_error(self, message):
         helper_logger.log_error("CMIS: {}".format(message))
 
@@ -1098,7 +1101,11 @@ class CmisManagerTask(threading.Thread):
             return media_lanes_mask
 	
         media_lane_start_bit = (media_lane_count * (0 if subport == 0 else subport - 1))
-        if media_lane_assignment_option & (1 << media_lane_start_bit):
+        mask_okay = (media_lane_assignment_option & (1 << media_lane_start_bit))
+        if media_lane_assignment_option == 0:
+            self.log_warning("{}: Invalid media lane assignment option for appl {}, ignoring...".format(lport, appl))
+            mask_okay = True
+        if mask_okay:
             media_lanes_mask = ((1 << media_lane_count) - 1) << media_lane_start_bit
         else:
             self.log_error("Unable to find starting media lane - media_lane_assignment_option {}"
