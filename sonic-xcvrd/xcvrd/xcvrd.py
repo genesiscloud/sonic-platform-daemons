@@ -2484,7 +2484,7 @@ class DaemonXcvrd(daemon_base.DaemonBase):
             import sonic_platform.platform
             import sonic_platform_base.sonic_sfp.sfputilhelper
             platform_chassis = sonic_platform.platform.Platform().get_chassis()
-            self.log_info("chassis loaded {}".format(platform_chassis))
+            self.log_info("chassis loaded {}, has {} SFPs".format(platform_chassis, platform_chassis.get_num_sfps()))
             # we have to make use of sfputil for some features
             # even though when new platform api is used for all vendors.
             # in this sense, we treat it as a part of new platform api.
