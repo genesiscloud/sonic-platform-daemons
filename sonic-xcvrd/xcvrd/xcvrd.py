@@ -1417,7 +1417,7 @@ class CmisManagerTask(threading.Thread):
         subport = sorted(startlanes_on_pport).index(startlane) + 1
         self.log_notice("{}: Guessing subport {} of {} on pport {}"
                         .format(own_lport, subport, len(startlanes_on_pport), own_pport))
-        return subport + 1
+        return subport
 
     def task_worker(self):
         self.xcvr_table_helper = XcvrTableHelper(self.namespaces)
